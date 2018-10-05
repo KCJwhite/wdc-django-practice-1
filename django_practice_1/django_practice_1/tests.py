@@ -8,3 +8,9 @@ class TasksTestCase(TestCase):
         response = self.client.get('/hello-world/')
         assert response.status_code == 200
         assert 'Hello World' in str(response.content)
+
+    def test_date(self):
+        """Should return today's date in response."""
+        response = self.client.get('/current_date/')
+        assert response.status_code == 200
+        assert datetime.date.today() in str(response.content)

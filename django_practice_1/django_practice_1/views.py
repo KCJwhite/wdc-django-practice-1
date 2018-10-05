@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+import datetime
 
 from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseBadRequest
@@ -6,50 +6,62 @@ from django.http import HttpResponse, HttpResponseBadRequest
 
 # Use /hello-world URL
 def hello_world(request):
-    """Return a 'Hello World' string using HttpResponse"""
-    pass
+    return HttpResponse("Hello World")
 
 
 # Use /date URL
 def current_date(request):
-    """
-        Return a string with current date using the datetime library.
-
-        i.e: 'Today is 5, January 2018'
-    """
-    pass
+    today = datetime.date.today()
+    return HttpResponse(today.strftime("Today is %d, %B %Y"))
 
 
 # Use URL with format /my-age/<year>/<month>/<day>
 def my_age(request, year, month, day):
-    """
-        Return a string with the format: 'Your age is X years old'
-        based on given /year/month/day datetime that come in the URL.
-
-        i.e: /my-age/1992/1/20 returns 'Your age is 26 years old'
-    """
-    pass
-
+    today = datetime.date.today()
+    bday = datetime.date(year, month, day)
+    age = today.year - bday.year - ((today.month, today.day) < (bday.month, bday.day))
+    
+    if age > 0:
+        return HttpResponse("Your age is %s years old" % age)
+    else:
+        return HttpResponse("Please enter a valid date is /YYYY/MM/DD format.")
 
 # Use URL with format /next-birthday/<birthday>
 def next_birthday(request, birthday):
-    """
-        Return a string with the format: 'Days until next birthday: XYZ'
-        based on a given string GET parameter that comes in the URL, with the
-        format 'YYYY-MM-DD'
-    """
-    pass
+    try:
+        b = birthday.split('-')
+        bday = datetime.date(int(b[0]), int(b[1]), int(b[2]))
+    except:
+        return HttpResponse("Please enter date in YYYY-MM-DD format.")
+
+    
+    today = datetime.date.today()
+    
+
+    if bday.year > today.year:
+        return HttpResponse("Please enter a birthdate not in the future.")
+    elif ((today.month, today.day) > (bday.month, bday.day)):
+        bday = bday.replace(year=today.year + 1)
+    else:
+        bday = bday.replace(year=today.year)
+    
+    days = (bday - today).days
+
+    if days == 0:
+        return HttpResponse("Happy birthday!")
+    else:
+        return HttpResponse("Days until next birthday: %s" % days)
+
+
 
 
 # Use /profile URL
 def profile(request):
-    """
-        This view should render the template 'profile.html'. Make sure you return
-        the correct context to make it work.
-    """
-    pass
-
-
+    context = {
+            "my_name": "Joshua",
+            "my_age": "38",
+            }
+    return render(request, 'profile.html', context)
 
 """
     The goal for next task is to practice routing between two URLs.
@@ -66,6 +78,7 @@ def profile(request):
     rendering the 'author.html' template. Make sure to complete the given
     'author.html' template with the data that you send.
 """
+
 AUTHORS_INFO = {
     'poe': {
         'full_name': 'Edgar Allan Poe',
@@ -83,8 +96,7 @@ AUTHORS_INFO = {
 
 # Use provided URLs, don't change them
 def authors(request):
-    pass
-
+    return render(request, 'authors.html', AUTHORS_INFO)
 
 def author(request, authors_last_name):
-    pass
+    return render(request, 'author.html', AUTHORS_INFO[authors_last_name])
