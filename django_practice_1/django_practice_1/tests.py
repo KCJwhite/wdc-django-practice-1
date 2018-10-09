@@ -13,4 +13,4 @@ class TasksTestCase(TestCase):
         """Should return today's date in response."""
         response = self.client.get('/current_date/')
         assert response.status_code == 200
-        assert datetime.date.today().strftime("Today is %d, %V %Y") in str(response.content)
+        assert datetime.date.today().strftime("Today is %d, %B %Y") in str(response.content)
